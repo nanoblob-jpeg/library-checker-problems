@@ -555,13 +555,30 @@ class Problem:
 
 
 def main(args: List[str]):
+    parser = argparse.ArgumentParser(description='Testcase Generator')
+    parser.add_argument('toml', nargs='*', help='Toml File')
+    parser.add_argument('-p', '--problem', nargs='*',
+                        help='Generate problem', default=[])
+
+    parser.add_argument('--dev', action='store_true', help='Developer Mode')
+    parser.add_argument('--test', action='store_true', help='CI Mode')
+    parser.add_argument('--clean', action='store_true', help='Clean in/out')
+    parser.add_argument('--silent', action='store_true', help='no logs')
+    parser.add_argument('--compile-checker',
+                        action='store_true', help='Deprecated: Compile Checker')
+
+    opts = parser.parse_args(args)
+    level = 'INFO'
+    if opts.silent:
+        level = 'CRITICAL'
+
     try:
         import colorlog
     except ImportError:
         basicConfig(
             format="%(asctime)s [%(levelname)s] %(message)s",
             datefmt="%H:%M:%S",
-            level=getenv('LOG_LEVEL', 'INFO'),
+            level=getenv('LOG_LEVEL', level),
         )
         logger.warn('Please install colorlog: pip3 install colorlog')
     else:
@@ -578,22 +595,9 @@ def main(args: List[str]):
             })
         handler.setFormatter(formatter)
         basicConfig(
-            level=getenv('LOG_LEVEL', 'INFO'),
+            level=getenv('LOG_LEVEL', level),
             handlers=[handler]
         )
-
-    parser = argparse.ArgumentParser(description='Testcase Generator')
-    parser.add_argument('toml', nargs='*', help='Toml File')
-    parser.add_argument('-p', '--problem', nargs='*',
-                        help='Generate problem', default=[])
-
-    parser.add_argument('--dev', action='store_true', help='Developer Mode')
-    parser.add_argument('--test', action='store_true', help='CI Mode')
-    parser.add_argument('--clean', action='store_true', help='Clean in/out')
-    parser.add_argument('--compile-checker',
-                        action='store_true', help='Deprecated: Compile Checker')
-
-    opts = parser.parse_args(args)
 
     if opts.dev + opts.test + opts.clean >= 2:
         raise ValueError('at most one of --dev, --test, --clean can be used')
