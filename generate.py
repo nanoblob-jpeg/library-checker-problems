@@ -580,7 +580,6 @@ def main(args: List[str]):
             datefmt="%H:%M:%S",
             level=getenv('LOG_LEVEL', level),
         )
-        logger.warn('Please install colorlog: pip3 install colorlog')
     else:
         handler = colorlog.StreamHandler()
         formatter = colorlog.ColoredFormatter(
